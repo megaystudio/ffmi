@@ -1,4 +1,4 @@
-# FFMI - Feed Formulation & Manufacturing Intelligence (Web) v1.2.0
+# FFMI - Feed Formulation & Manufacturing Intelligence (Web) v1.2.1
 
 Aplikasi web statis (tanpa server, tanpa build). Data pengguna tersimpan di browser masing-masing (localStorage) dan tidak dikirim ke server.
 Sumber aplikasi: FFMI.html versi offline lengkap (diperbarui 2 Okt 2026) + lapisan web (PWA, pembatasan Premium, User Manual, versi).
@@ -7,7 +7,7 @@ Sumber aplikasi: FFMI.html versi offline lengkap (diperbarui 2 Okt 2026) + lapis
 1. Ekstrak ZIP ini. Upload SELURUH isinya ke root repository (timpa file lama): index.html, sw.js, manifest.webmanifest, README.md, .nojekyll, icons/, download/.
    JANGAN upload `keygen.js` - itu alat penjual.
 2. Settings > Pages > Source: "Deploy from a branch" > `main` / `/ (root)` > Save (cukup sekali).
-3. Tunggu 1-3 menit, lalu buka `https://<username>.github.io/<nama-repo>/`. Header harus menampilkan versi v1.2.0.
+3. Tunggu 1-3 menit, lalu buka `https://<username>.github.io/<nama-repo>/`. Header harus menampilkan versi v1.2.1.
 
 ## Mode Demo dan Premium
 - Web (tab browser) dan aplikasi terinstal (PWA): selalu Demo, kolom kode akses Premium tidak ditampilkan.
@@ -21,7 +21,7 @@ Manual ada di dalam aplikasi (menu Panduan, juga dari layar login), Indonesia da
 ## CHECKLIST SETIAP UPDATE (wajib)
 1. Ubah aplikasi di `index.html` (jika sumbernya FFMI.html offline yang baru, terapkan ulang lapisan web).
 2. Perbarui bagian terkait di `MAN` (id dan en) dan tambah entri di `CHANGELOG`.
-3. Naikkan `APP_VER` dan `APP_DATE` di `index.html`, dan `VERSION` di `sw.js` (mis. `ffmi-1.2.1`).
+3. Naikkan `APP_VER` dan `APP_DATE` di `index.html`, dan `VERSION` di `sw.js` (mis. `ffmi-1.2.2`).
 4. Buat ulang `download/FFMI-offline.zip`: salin `index.html` menjadi `FFMI.html`, zip bersama `BACA-DULU.txt`.
 5. Perbarui judul versi README ini, lalu commit dan push.
 
