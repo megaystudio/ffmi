@@ -1,0 +1,319 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1f6f5c"><meta name="description" content="FFMI - Feed Formulation &amp; Manufacturing Intelligence: formulasi pakan dan analisa kelayakan produksi untuk profesional feedmill."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>FFMI - Feed Formulation & Manufacturing Intelligence</title>
+<style>
+:root{--bg:#eef1ed;--pn:#fff;--tx:#1b2826;--mu:#5d6b68;--ac:#1f6f5c;--gd:#c8962e;--ln:#d5dcd7;--ok:#1f8a4c;--wr:#c8962e;--bd:#c0392b}
+[data-t=dark]{--bg:#14201e;--pn:#1d2d2a;--tx:#e8efec;--mu:#9bb0aa;--ln:#2f4540}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:Georgia,serif;margin:.2em 0}
+header{display:flex;gap:12px;align-items:center;padding:10px 16px;background:var(--ac);color:#fff;flex-wrap:wrap}
+header b{font:700 18px Georgia,serif;flex:1}header span{opacity:.85;font-size:13px}
+nav{display:flex;overflow-x:auto;background:var(--pn);border-bottom:1px solid var(--ln)}
+nav button{border:0;background:none;color:var(--tx);padding:12px 16px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;font:inherit}
+nav button.on{border-color:var(--gd);font-weight:600}
+main{max-width:1100px;margin:auto;padding:16px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:14px;margin-bottom:14px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+label{font-size:12px;color:var(--mu);display:block}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--tx);font:inherit}
+button.b{background:var(--ac);color:#fff;border:0;padding:9px 16px;border-radius:6px;cursor:pointer;font:inherit}
+button.b.s{background:none;color:var(--ac);border:1px solid var(--ac)}button.b.d{background:var(--bd)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gd);outline-offset:1px}
+.w{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:4px;border-bottom:1px solid var(--ln);text-align:left}
+td input{min-width:62px;padding:5px}td input.n{min-width:120px}
+.silo{display:flex;height:34px;border-radius:6px;overflow:hidden;margin:8px 0}.silo i{display:block}
+.pill{display:inline-block;padding:2px 10px;border-radius:12px;color:#fff;font-size:12px}
+.L{background:var(--ok)}.M{background:var(--wr)}.H{background:var(--bd)}
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.ban{background:var(--gd);color:#222;padding:6px 16px;font-size:13px}
+#lg{max-width:380px;margin:12vh auto;padding:16px}.mu{color:var(--mu);font-size:13px}
+details{border-bottom:1px solid var(--ln);padding:6px 0}summary{cursor:pointer;font-weight:600}.tg{display:flex;gap:6px;flex-wrap:wrap}.tg button.b{padding:6px 10px;font-size:13px}h4{margin:14px 0 4px}code{background:var(--bg);padding:1px 5px;border-radius:4px}header button.b{background:none;border:1px solid #fff;color:#fff}
+a.b{background:var(--ac);color:#fff;padding:9px 16px;border-radius:6px;text-decoration:none;display:inline-block}
+</style></head><body><div id="app"></div>
+<script>
+const $=s=>document.querySelector(s),KEY='ffmi_v1',SALT='megay-ffmi-26';
+let S=JSON.parse(localStorage.getItem(KEY)||'null'),page='form',res=null,msg='';
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+const T=(a,b)=>S&&S.lang=='en'?b:a,esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function h32(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+const chk=b=>h32(b+SALT).toString(36).toUpperCase().padStart(4,'0').slice(-4);
+// Mode jalan: 'offline' = file diunduh & dibuka langsung (file://), 'app' = di-install sebagai aplikasi, 'web' = tab browser di situs.
+// Premium HANYA aktif di 'offline' (file FFMI.html yang diunduh). Di 'web' dan 'app' (PWA terinstal) selalu Demo.
+// Ubah PREM_OK menjadi MODE!=='web' bila suatu saat aplikasi terinstal juga ingin diizinkan Premium.
+const MODE=location.protocol==='file:'?'offline':((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone?'app':'web'),PREM_OK=MODE==='offline';
+const APP_VER='1.1.1',APP_DATE='2026-10-06';
+const where=()=>MODE=='app'?T('aplikasi terinstal','installed app'):'web',modeLbl=()=>MODE=='offline'?T('File unduhan','Downloaded file'):MODE=='app'?T('Aplikasi terinstal','Installed app'):'Web';
+let DP=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();DP=e});
+function inst(){if(DP){DP.prompt();DP=null}else alert(T('Gunakan menu browser: "Install app" / "Tambahkan ke layar utama".','Use the browser menu: "Install app" / "Add to Home Screen".'))}
+function webBox(){const ap=MODE=='app';return`<p class="mu">${T('Versi ini ('+where()+') hanya untuk Demo. Premium hanya dijalankan di file FFMI.html yang diunduh dan dibuka secara offline, agar data Anda tetap aman di perangkat sendiri.','This version ('+where()+') is Demo only. Premium runs only in the downloaded FFMI.html file opened offline, so your data stays safe on your own device.')}</p><p><a class="b" href="download/FFMI-offline.zip" download>${T('Unduh versi offline (ZIP)','Download offline version (ZIP)')}</a>${ap?'':` <button type="button" class="b s" onclick="inst()">${T('Install sebagai aplikasi (Demo)','Install as app (Demo)')}</button>`}</p><p class="mu">${T('Setelah diunduh, buka FFMI.html lalu masukkan kode akses Premium di Pengaturan.','After downloading, open FFMI.html and enter your Premium access code in Settings.')} <a href="#" onclick="manOpen('editions');return false">${T('Baca Panduan','Read the Manual')}</a></p>`}
+const prem=()=>PREM_OK&&S.lic&&S.lic.ok;
+function valid(c){const m=c.trim().toUpperCase().match(/^FFMI-([A-Z0-9]{4})-([A-Z0-9]{4})-([A-Z0-9]{4})$/);return m&&chk(m[1]+m[2])==m[3]}
+async function hp(p,s){const d=s+p;if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(d));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}return String(h32(d))}
+const LIM={mats:8,machines:1,notes:3,forms:2};
+const NUT=[['me','ME kcal/kg'],['cp','CP %'],['lys','Lys %'],['met','Met %'],['ca','Ca %'],['ap','avP %'],['fib',T('Serat','Fiber')+' %'],['fat',T('Lemak','Fat')+' %']];
+// n,me,cp,fat,fib,ca,ap,lys,met,pr,mn,mx,pel
+const SEED=[['Jagung / Corn',3350,8.5,3.8,2.2,.02,.08,.26,.18,5500,0,70,60],['Dedak padi / Rice bran',2400,12,10,11,.1,.2,.5,.25,3200,0,20,55],['SBM 46',2400,46,1.5,6,.3,.2,2.9,.65,8200,0,40,70],['MBM',2150,50,9,2.5,8,4.5,2.6,.7,8000,0,10,40],['Wheat pollard',2200,15,3.5,8,.12,.3,.6,.22,4200,0,15,85],['Minyak sawit / Palm oil',8000,0,99,0,0,0,0,0,13000,0,6,10],['Limestone',0,0,0,0,38,0,0,0,900,0,3,50],['DCP',0,0,0,0,22,18,0,0,7500,0,2,50],['DL-Met',0,58,0,0,0,0,0,99,45000,0,.4,50],['L-Lys HCl',0,95,0,0,0,0,78,0,22000,0,.5,50],['Garam / Salt',0,0,0,0,0,0,0,0,2500,0,.4,50],['Premix',0,0,0,0,0,0,0,0,25000,.3,.3,50],['Bentonite',0,0,0,0,0,0,0,0,2500,0,2,100]];
+const MK=['n','me','cp','fat','fib','ca','ap','lys','met','pr','mn','mx','pel'];
+const PR={'Broiler Starter':[2950,22,1.3,.5,.95,1.05,.45,4],'Broiler Grower':[3050,20,1.15,.45,.9,1,.4,5],'Broiler Finisher':[3100,18.5,1,.4,.85,.95,.36,5],'Layer':[2750,16.5,.8,.38,3.6,4,.38,7]};
+function init(n,p,c){S={user:n,h:p.h,s:p.s,co:c,lang:'id',theme:'light',ac:'#1f6f5c',lic:null,
+mats:SEED.map(r=>Object.fromEntries(MK.map((k,i)=>[k,r[i]]))),machines:[{n:'Pellet Mill Line A',cap:8,maxFat:7,maxFib:6,minPel:55,maxLoad:92,proc:180}],notes:[],forms:[]};save()}
+function simplex(c,rows){const n=c.length,m=rows.length;let ns=0,na=0;
+rows=rows.map(r=>{r={...r};if(r.b<0){r.a=r.a.map(v=>-v);r.b=-r.b;r.t=r.t=='<'?'>':r.t=='>'?'<':'='}return r});
+rows.forEach(r=>{if(r.t!='=')ns++;if(r.t!='<')na++});
+const N=n+ns+na,Tb=[],bs=[],cost=Array(N).fill(0);let si=n,ai=n+ns;c.forEach((v,j)=>cost[j]=v);
+rows.forEach(r=>{const w=Array(N+1).fill(0);r.a.forEach((v,j)=>w[j]=v);w[N]=r.b;
+if(r.t=='<'){w[si]=1;bs.push(si++)}else{if(r.t=='>')w[si++]=-1;w[ai]=1;cost[ai]=1e6;bs.push(ai++)}Tb.push(w)});
+for(let it=0;it<4000;it++){const z=cost.map((cj,j)=>cj-bs.reduce((s,b,i)=>s+cost[b]*Tb[i][j],0));
+let e=-1,bv=-1e-9;for(let j=0;j<N;j++)if(z[j]<bv){bv=z[j];e=j}if(e<0)break;
+let l=-1,mr=Infinity;for(let i=0;i<m;i++)if(Tb[i][e]>1e-9){const q=Tb[i][N]/Tb[i][e];if(q<mr-1e-12){mr=q;l=i}}
+if(l<0)return null;const p=Tb[l][e];Tb[l]=Tb[l].map(v=>v/p);
+for(let i=0;i<m;i++)if(i!=l){const f=Tb[i][e];if(f)Tb[i]=Tb[i].map((v,j)=>v-f*Tb[l][j])}bs[l]=e}
+if(bs.some((b,i)=>b>=n+ns&&Tb[i][N]>1e-6))return null;
+const x=Array(n).fill(0);bs.forEach((b,i)=>{if(b<n)x[b]=Tb[i][N]});return x}
+function solve(pm,tg,mc){const M=S.mats,n=M.length,rows=[],E=i=>M.map((_,j)=>+(i==j));
+rows.push({a:M.map(()=>1),t:'=',b:100});
+NUT.forEach(([k])=>{const a=M.map(m=>(+m[k]||0)/100);let[lo,hi]=tg[k];
+if(k=='fat')hi=Math.min(hi??1e9,mc.maxFat);if(k=='fib')hi=Math.min(hi??1e9,mc.maxFib);
+if(lo!=null)rows.push({a,t:'>',b:lo});if(hi!=null&&hi<1e9)rows.push({a,t:'<',b:hi})});
+if(pm>0)rows.push({a:M.map(m=>(+m.pel||0)/100),t:'>',b:pm});
+M.forEach((m,i)=>{if(+m.mn>0)rows.push({a:E(i),t:'>',b:+m.mn});rows.push({a:E(i),t:'<',b:m.mx===''||m.mx==null?100:+m.mx})});
+return simplex(M.map(m=>(+m.pr||0)/100),rows)}
+function evalF(x,mc){const M=S.mats,f={n:{}};NUT.forEach(([k])=>f.n[k]=M.reduce((s,m,i)=>s+x[i]*(+m[k]||0)/100,0));
+f.cost=M.reduce((s,m,i)=>s+x[i]*(+m.pr||0)/100,0);f.pel=M.reduce((s,m,i)=>s+x[i]*(+m.pel||0)/100,0);
+const fb=f.n.fib,ft=f.n.fat,r=(v,a,b)=>v>a?2:v>b?1:0;
+f.load=70+(100-f.pel)*.3+Math.max(0,fb-3)*2-Math.max(0,ft-3)*1.5;
+f.tph=mc.cap*Math.min(1.05,Math.max(.7,Math.sqrt(f.pel/70)))*(1-Math.max(0,fb-3)*.02);
+f.r={pel:f.pel<mc.minPel-.01?2:f.pel<mc.minPel+8?1:0,choke:r(fb,mc.maxFib,mc.maxFib*.85),load:r(f.load,mc.maxLoad,mc.maxLoad-8),cap:f.tph<mc.cap*.9?2:f.tph<mc.cap*.97?1:0};
+f.ok=!Object.values(f.r).includes(2);f.true=f.cost+(+mc.proc||0);return f}
+const val=id=>{const v=$('#'+id).value;return v===''?null:+v};
+function run(){const mc=S.machines[+$('#mc').value]||S.machines[0],tg={};
+NUT.forEach(([k])=>tg[k]=[val('t'+k+'a'),val('t'+k+'b')]);
+const best=d=>{for(let p=Math.floor(mc.minPel+d);p>=0;p-=2){const x=solve(p,tg,mc);if(x)return x}return null};
+const sets=[[T('Biaya terendah','Lowest cost'),()=>solve(0,tg,mc)],[T('Risiko produksi terendah','Lowest manufacturing risk'),()=>best(12)],[T('Seimbang biaya vs produksi','Balanced cost vs manufacturing'),()=>best(5)]];
+res=[];for(const[l,fn]of sets.slice(0,prem()?3:1)){const x=fn();if(x)res.push({l,x,f:evalF(x,mc),mc:mc.n})}
+msg=res.length?'':T('Tidak ada solusi: target nutrisi tidak bisa dipenuhi dengan bahan & batas inklusi saat ini. Longgarkan target atau tambah bahan.','No solution: nutrition targets cannot be met with current materials and inclusion limits. Relax targets or add materials.');
+render()}
+const rp=v=>'Rp '+Math.round(v).toLocaleString('id-ID'),RK=['L','M','H'],RT=()=>[T('Rendah','Low'),T('Sedang','Medium'),T('Tinggi','High')];
+function cand(c,i){const f=c.f,M=S.mats,rt=RT(),why=[];
+if(f.r.pel)why.push(T(`Skor pelletability ${f.pel.toFixed(0)} dekat/di bawah kebutuhan mesin`,`Pelletability ${f.pel.toFixed(0)} is near/below machine need`));
+if(f.r.choke)why.push(T(`Serat ${f.n.fib.toFixed(1)}% mendekati batas die`,`Fiber ${f.n.fib.toFixed(1)}% approaches die limit`));
+if(f.r.load)why.push(T(`Estimasi motor load ${f.load.toFixed(0)}%`,`Estimated motor load ${f.load.toFixed(0)}%`));
+if(f.r.cap)why.push(T('Kapasitas turun dari nominal','Throughput below nominal'));
+const kn=S.notes.filter(n=>M.some((m,j)=>m.n==n.m&&c.x[j]>.01));
+return`<div class="card"><h3>${c.l}</h3><div class="silo">${M.map((m,j)=>c.x[j]>.01?`<i title="${esc(m.n)} ${c.x[j].toFixed(2)}%" style="width:${c.x[j]}%;background:hsl(${j*47},45%,${S.theme=='dark'?45:52}%)"></i>`:'').join('')}</div>
+<div class="w"><table>${M.map((m,j)=>c.x[j]>.01?`<tr><td>${esc(m.n)}</td><td>${c.x[j].toFixed(2)}%</td></tr>`:'').join('')}</table></div>
+<p><b>${rp(f.cost)}/kg</b> ${T('bahan baku','raw material')} · <b>${rp(f.true)}/kg</b> ${T('biaya manufaktur sebenarnya','true manufacturing cost')}</p>
+<p class="mu">${NUT.map(([k,l])=>l.split(' ')[0]+' '+f.n[k].toFixed(k=='me'?0:2)).join(' · ')}</p>
+<p>${T('Kelayakan','Feasibility')}: <span class="pill ${f.ok?'L':'H'}">${f.ok?T('Feasible','Feasible'):T('Tidak feasible','Not feasible')}</span> · ${T('Estimasi output','Est. output')} ${f.tph.toFixed(1)} t/h</p>
+<p>${[['pel',T('Kualitas pellet','Pellet quality')],['choke','Choking'],['load','Motor load'],['cap',T('Dampak kapasitas','Capacity impact')]].map(([k,l])=>`${l}: <span class="pill ${RK[f.r[k]]}">${rt[f.r[k]]}</span>`).join(' ')}</p>
+<p class="mu"><b>${T('Mengapa?','Why?')}</b> ${why.join('; ')||T('Semua indikator dalam rentang mesin.','All indicators within machine range.')}</p>
+${kn.length?`<p class="mu"><b>${T('Knowledge terkait','Related knowledge')}:</b> ${kn.map(n=>esc(n.m)+': '+esc(n.t)+' ('+esc(n.src)+')').join(' | ')}</p>`:''}
+<button class="b s" onclick="saveF(${i})">${T('Simpan formula','Save formula')}</button></div>`}
+function saveF(i){if(!prem()&&S.forms.length>=LIM.forms)return alert(T('Mode Demo: maksimal '+LIM.forms+' formula tersimpan. Aktifkan kode akses Premium.','Demo mode: max '+LIM.forms+' saved formulas. Enter a Premium access code.'));
+const c=res[i],nm=prompt(T('Nama formula','Formula name'),$('#pre').value+' V'+(S.forms.length+1));if(!nm)return;
+S.forms.push({nm,d:new Date().toLocaleDateString(),c:c.l,mc:c.mc,x:Object.fromEntries(S.mats.map((m,j)=>[m.n,+c.x[j].toFixed(3)]).filter(a=>a[1]>0)),cost:c.f.cost,tph:c.f.tph,act:''});save();alert(T('Tersimpan','Saved'))}
+function fillP(){const p=PR[$('#pre').value];if(!p)return;const v={me:[p[0],''],cp:[p[1],''],lys:[p[2],''],met:[p[3],''],ca:[p[4],p[5]],ap:[p[6],''],fib:['',p[7]],fat:['','']};NUT.forEach(([k])=>{$('#t'+k+'a').value=v[k][0];$('#t'+k+'b').value=v[k][1]})}
+function pForm(){return`<div class="card"><h2>${T('Formulasi','Formulation')}</h2><div class="g"><div><label>${T('Target nutrisi','Nutrition target')}</label><select id="pre" onchange="fillP()">${Object.keys(PR).map(k=>`<option>${k}</option>`).join('')}</select></div>
+<div><label>${T('Mesin / Line','Machine / Line')}</label><select id="mc">${S.machines.map((m,i)=>`<option value="${i}">${esc(m.n)}</option>`).join('')}</select></div></div>
+<div class="w"><table><tr><th></th>${NUT.map(([k,l])=>`<th>${l}</th>`).join('')}</tr><tr><td>Min</td>${NUT.map(([k])=>`<td><input type="number" step="any" id="t${k}a"></td>`).join('')}</tr><tr><td>Max</td>${NUT.map(([k])=>`<td><input type="number" step="any" id="t${k}b"></td>`).join('')}</tr></table></div>
+<p><button class="b" onclick="run()">${T('Hitung formula','Generate')}</button> <span class="mu">${prem()?'':T('Demo: 1 kandidat (biaya terendah). Premium: 3 kandidat.','Demo: 1 candidate (lowest cost). Premium: 3 candidates.')}</span></p></div>
+${msg?`<div class="card" style="border-color:var(--bd)">${msg}</div>`:''}<div class="cands">${res?res.map(cand).join(''):''}</div>`}
+function tbl(L,cols,add){const A=S[L];return`<div class="card"><div class="w"><table><tr>${cols.map(c=>`<th>${c[1]}</th>`).join('')}<th></th></tr>${A.map((r,i)=>`<tr>${cols.map(c=>`<td><input class="${c[0]=='n'?'n':''}" type="${c[2]||'number'}" step="any" value="${esc(r[c[0]])}" onchange="ed('${L}',${i},'${c[0]}',this)"></td>`).join('')}<td><button class="b d" onclick="del('${L}',${i})">×</button></td></tr>`).join('')}</table></div>
+<p><button class="b" onclick="add('${L}')">+ ${T('Tambah','Add')}</button> ${!prem()&&LIM[L]?`<span class="mu">Demo: ${A.length}/${LIM[L]}</span>`:''}</p>${add||''}</div>`}
+function ed(L,i,k,e){S[L][i][k]=e.type=='number'?(e.value===''?'':+e.value):e.value;save()}
+function del(L,i){if(confirm(T('Hapus baris ini?','Delete this row?'))){S[L].splice(i,1);save();render()}}
+function add(L){if(!prem()&&LIM[L]&&S[L].length>=LIM[L])return alert(T('Mode Demo: batas '+LIM[L]+' data tercapai. Masukkan kode akses Premium di Pengaturan.','Demo mode: limit of '+LIM[L]+' reached. Enter a Premium code in Settings.'));
+S[L].push(L=='mats'?{n:'Baru',me:0,cp:0,fat:0,fib:0,ca:0,ap:0,lys:0,met:0,pr:0,mn:0,mx:100,pel:50}:L=='machines'?{n:'Line B',cap:8,maxFat:7,maxFib:6,minPel:55,maxLoad:92,proc:180}:L=='notes'?{m:S.mats[0].n,t:'',src:'Expert',conf:'Medium'}:{});save();render()}
+function pHist(){return`<div class="card"><h2>${T('Riwayat & umpan balik produksi','History & production feedback')}</h2>${S.forms.length?`<div class="w"><table><tr><th>${T('Formula','Formula')}</th><th>${T('Tanggal','Date')}</th><th>Rp/kg</th><th>${T('Output estimasi t/h','Expected t/h')}</th><th>${T('Output aktual t/h','Actual t/h')}</th><th>${T('Deviasi','Deviation')}</th><th></th></tr>${S.forms.map((f,i)=>`<tr><td>${esc(f.nm)}<br><span class="mu">${esc(f.mc)} · ${esc(f.c)}</span></td><td>${f.d}</td><td>${Math.round(f.cost)}</td><td>${f.tph.toFixed(1)}</td><td><input type="number" step="any" value="${f.act}" onchange="ed('forms',${i},'act',this);render()"></td><td>${f.act!==''?((f.act-f.tph)/f.tph*100).toFixed(1)+'%':'-'}</td><td><button class="b d" onclick="del('forms',${i})">×</button></td></tr>`).join('')}</table></div>`:`<p class="mu">${T('Belum ada formula tersimpan. Buat di menu Formulasi.','No saved formulas. Create one in Formulation.')}</p>`}</div>`}
+function pSet(){const l=prem();return`<div class="card"><h2>${T('Pengaturan','Settings')}</h2><div class="g"><div><label>${T('Bahasa','Language')}</label><select onchange="S.lang=this.value;ML=null;save();render()"><option value="id" ${S.lang=='id'?'selected':''}>Indonesia</option><option value="en" ${S.lang=='en'?'selected':''}>English</option></select></div>
+<div><label>${T('Tema','Theme')}</label><select onchange="S.theme=this.value;save();render()"><option value="light">${T('Terang','Light')}</option><option value="dark" ${S.theme=='dark'?'selected':''}>${T('Gelap','Dark')}</option></select></div>
+<div><label>${T('Warna utama','Accent')}</label><input type="color" value="${S.ac}" onchange="S.ac=this.value;save();render()"></div>
+<div><label>${T('Nama perusahaan','Company')}</label><input value="${esc(S.co)}" onchange="S.co=this.value;save();render()"></div></div></div>
+<div class="card"><h3>${T('Lisensi','License')}: ${l?'Premium':'Demo'}</h3>${l?`<p class="mu">${esc(S.lic.code)}</p>`:(PREM_OK?`<div class="g"><input id="lc" placeholder="FFMI-XXXX-XXXX-XXXX"><button class="b" onclick="act()">${T('Aktifkan','Activate')}</button></div>`:webBox())}</div>
+<div class="card"><h3>${T('Data & keamanan','Data & security')}</h3><p><button class="b s" onclick="bk()">${T('Backup data','Backup data')}</button> <label style="display:inline"><input type="file" id="rs" accept=".json" style="display:none" onchange="rest(this)"><span class="b s" style="padding:9px 16px;border:1px solid;border-radius:6px;cursor:pointer;color:var(--ac)">${T('Restore data','Restore data')}</span></label> <button class="b s" onclick="cpw()">${T('Ganti password','Change password')}</button> <button class="b" onclick="OK=0;render()">${T('Keluar','Log out')}</button></p><p class="mu">${T('Semua data tersimpan lokal di perangkat ini. Backup berkala; pindah perangkat lewat Restore.','All data stays local on this device. Back up regularly; move devices via Restore.')}</p></div>`}
+function act(){if(!PREM_OK)return;const c=$('#lc').value;if(valid(c)){S.lic={ok:1,code:c.trim().toUpperCase()};save();render()}else alert(T('Kode akses tidak valid','Invalid access code'))}
+function bk(){if(!prem())return alert(T('Backup tersedia di Premium','Backup is a Premium feature'));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='FFMI-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
+function rest(e){if(!prem())return alert(T('Restore tersedia di Premium','Restore is a Premium feature'));const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.mats)throw 0;S=d;save();render();alert('OK')}catch{alert(T('File backup tidak valid','Invalid backup file'))}};r.readAsText(e.files[0])}
+async function cpw(){const p=prompt(T('Password baru (min 6 karakter)','New password (min 6 chars)'));if(p&&p.length>=6){S.s=Math.random().toString(36).slice(2);S.h=await hp(p,S.s);save();alert('OK')}}
+// ===== USER MANUAL (di dalam aplikasi) =====
+// ATURAN PEMELIHARAAN: setiap perubahan/update aplikasi WAJIB diikuti pembaruan MAN (bagian terkait) dan CHANGELOG,
+// menaikkan APP_VER (di sini) dan VERSION di sw.js, lalu membuat ulang download/FFMI-offline.zip.
+const MAN=[
+{id:'about',t:{id:'Tentang aplikasi',en:'About the app'},b:{
+id:`<p><b>FFMI (Feed Formulation &amp; Manufacturing Intelligence)</b> membantu profesional feedmill menyusun formula pakan yang memenuhi target nutrisi dengan biaya terendah <i>sekaligus</i> memeriksa apakah formula itu layak diproduksi di mesin Anda (kualitas pellet, choking, motor load, dan dampak ke kapasitas).</p>
+<ul><li>Aplikasi ini <b>single user</b>: satu akun per perangkat/browser.</li><li>Semua data disimpan <b>lokal</b> di perangkat Anda dan tidak dikirim ke server mana pun.</li><li>Tersedia dalam Bahasa Indonesia dan English (ubah di Pengaturan).</li><li>Nilai bahan baku, harga, dan mesin bawaan hanyalah <b>contoh</b>. Ganti dengan data lab dan data lini produksi Anda sebelum dipakai untuk keputusan nyata.</li></ul>
+<p>Menu utama: <b>Formulasi</b>, <b>Bahan baku</b>, <b>Mesin</b>, <b>Knowledge</b>, <b>Riwayat</b>, <b>Panduan</b> (halaman ini), dan <b>Pengaturan</b>.</p>`,
+en:`<p><b>FFMI (Feed Formulation &amp; Manufacturing Intelligence)</b> helps feedmill professionals build feed formulas that meet nutrition targets at the lowest cost <i>and</i> checks whether the formula can actually be produced on your machine (pellet quality, choking, motor load, capacity impact).</p>
+<ul><li>This is a <b>single-user</b> app: one account per device/browser.</li><li>All data is stored <b>locally</b> on your device and is never sent to any server.</li><li>Available in Indonesian and English (change it in Settings).</li><li>The built-in material values, prices and machine are only <b>samples</b>. Replace them with your lab and line data before using results for real decisions.</li></ul>
+<p>Main menus: <b>Formulation</b>, <b>Raw materials</b>, <b>Machines</b>, <b>Knowledge</b>, <b>History</b>, <b>Manual</b> (this page) and <b>Settings</b>.</p>`}},
+
+{id:'editions',t:{id:'Versi Web (Demo) dan Premium',en:'Web version (Demo) and Premium'},b:{
+id:`<p>FFMI tersedia dalam dua cara pakai. Premium sengaja <b>hanya berjalan secara offline</b> pada file yang diunduh, agar data Anda tetap aman di perangkat sendiri.</p>
+<div class="w"><table><tr><th></th><th>Web (tab browser)</th><th>Aplikasi terinstal</th><th>File unduhan (FFMI.html)</th></tr>
+<tr><td>Mode</td><td>Demo</td><td>Demo</td><td>Demo, atau Premium dengan kode akses</td></tr>
+<tr><td>Perlu internet</td><td>Saat pertama dibuka</td><td>Tidak, setelah terinstal</td><td>Tidak pernah</td></tr>
+<tr><td>Kolom kode akses Premium</td><td>Tidak ada</td><td>Tidak ada</td><td>Ada di Pengaturan</td></tr></table></div>
+<p><b>Batas mode Demo:</b></p><ul><li>1 kandidat formula per perhitungan (biaya terendah).</li><li>Maksimal 2 formula tersimpan.</li><li>1 mesin, maksimal 3 catatan Knowledge.</li><li>Penambahan bahan baku dibatasi 8 baris. Aplikasi dimulai dengan 13 bahan contoh, jadi di Demo Anda mengedit bahan yang ada.</li><li>Backup dan Restore data tidak tersedia.</li></ul>
+<p><b>Premium</b> membuka: 3 kandidat formula (biaya terendah, risiko produksi terendah, seimbang), formula/mesin/bahan/knowledge tanpa batas, serta Backup dan Restore.</p>
+<p>Banner di atas layar dan lencana di header (mis. <i>v${APP_VER} · Web · Demo</i>) selalu menunjukkan versi, mode jalan, dan status lisensi Anda.</p>`,
+en:`<p>FFMI can be used in two ways. Premium deliberately <b>runs only offline</b> on the downloaded file, so your data stays safe on your own device.</p>
+<div class="w"><table><tr><th></th><th>Web (browser tab)</th><th>Installed app</th><th>Downloaded file (FFMI.html)</th></tr>
+<tr><td>Mode</td><td>Demo</td><td>Demo</td><td>Demo, or Premium with an access code</td></tr>
+<tr><td>Needs internet</td><td>On first open</td><td>No, once installed</td><td>Never</td></tr>
+<tr><td>Premium access code field</td><td>None</td><td>None</td><td>In Settings</td></tr></table></div>
+<p><b>Demo mode limits:</b></p><ul><li>1 formula candidate per calculation (lowest cost).</li><li>Up to 2 saved formulas.</li><li>1 machine, up to 3 Knowledge notes.</li><li>Adding raw materials is limited to 8 rows. The app starts with 13 sample materials, so in Demo you edit the existing ones.</li><li>Data Backup and Restore are not available.</li></ul>
+<p><b>Premium</b> unlocks: 3 formula candidates (lowest cost, lowest manufacturing risk, balanced), unlimited formulas/machines/materials/knowledge, plus Backup and Restore.</p>
+<p>The banner on top and the badge in the header (e.g. <i>v${APP_VER} · Web · Demo</i>) always show your version, running mode and license status.</p>`}},
+
+{id:'install',t:{id:'Download dan install',en:'Download and install'},b:{
+id:`<h4>A. Unduh versi offline (diperlukan untuk Premium)</h4>
+<ol><li>Buka <b>Pengaturan</b> lalu tekan <b>Unduh versi offline (ZIP)</b> di kotak Lisensi.</li><li>Ekstrak ZIP. Isinya <code>FFMI.html</code> dan <code>BACA-DULU.txt</code>.</li><li>Salin folder ke komputer, flashdisk, atau HP/tablet.</li><li>Buka <code>FFMI.html</code> dengan browser (Chrome, Edge, Firefox, atau Safari). Tidak perlu instalasi dan tidak perlu internet.</li></ol>
+<p>Di HP/tablet, jika file tidak terbuka dari pengelola file, pilih <i>Buka dengan</i> lalu pilih browser.</p>
+<h4>B. Install sebagai aplikasi (hanya Demo)</h4>
+<ul><li><b>Chrome/Edge komputer:</b> ikon install di ujung kolom alamat, atau menu <i>Install app</i>.</li><li><b>Android (Chrome):</b> menu ⋮ lalu <i>Install app</i> / <i>Tambahkan ke layar utama</i>.</li><li><b>iPhone/iPad (Safari):</b> tombol Bagikan lalu <i>Tambah ke Layar Utama</i>.</li></ul>
+<p>Aplikasi terinstal bisa dibuka offline, tetapi tetap berstatus <b>Demo</b>. Untuk Premium gunakan file unduhan (A).</p>`,
+en:`<h4>A. Download the offline version (required for Premium)</h4>
+<ol><li>Open <b>Settings</b> and press <b>Download offline version (ZIP)</b> in the License box.</li><li>Extract the ZIP. It contains <code>FFMI.html</code> and <code>BACA-DULU.txt</code>.</li><li>Copy the folder to a computer, flash drive, or phone/tablet.</li><li>Open <code>FFMI.html</code> in a browser (Chrome, Edge, Firefox or Safari). No installation and no internet needed.</li></ol>
+<p>On phones/tablets, if the file does not open from the file manager, choose <i>Open with</i> and pick a browser.</p>
+<h4>B. Install as an app (Demo only)</h4>
+<ul><li><b>Desktop Chrome/Edge:</b> install icon at the end of the address bar, or menu <i>Install app</i>.</li><li><b>Android (Chrome):</b> ⋮ menu, then <i>Install app</i> / <i>Add to Home screen</i>.</li><li><b>iPhone/iPad (Safari):</b> Share button, then <i>Add to Home Screen</i>.</li></ul>
+<p>The installed app works offline but stays in <b>Demo</b> mode. Use the downloaded file (A) for Premium.</p>`}},
+
+{id:'setup',t:{id:'Setting dan penggunaan awal',en:'Setup and first use'},b:{
+id:`<ol><li><b>Buat akun.</b> Saat pertama dibuka pilih bahasa, isi nama perusahaan, user, dan password (minimal 6 karakter), lalu tekan <i>Buat akun &amp; mulai</i>. Berikutnya Anda cukup login.</li>
+<li><b>Atur tampilan</b> di Pengaturan: bahasa, tema terang/gelap, warna utama, nama perusahaan.</li>
+<li><b>Aktifkan Premium</b> (bila punya kode, hanya di file unduhan): Pengaturan, kotak Lisensi, isi kode format <code>FFMI-XXXX-XXXX-XXXX</code>, tekan <i>Aktifkan</i>.</li>
+<li><b>Isi data Anda.</b> Menu <b>Bahan baku</b>: perbarui nilai nutrisi dari hasil lab, harga (Rp/kg), batas inklusi Min/Max %, dan skor pelletability (Pel 0-100). Menu <b>Mesin</b>: isi kapasitas t/h, maksimum lemak dan serat, minimum skor pel, maksimum motor load, dan biaya proses Rp/kg sesuai lini Anda.</li>
+<li><b>Catat password</b> Anda. Tidak ada fitur lupa password (lihat Troubleshooting).</li>
+<li>Pengguna Premium: lakukan <b>Backup data</b> pertama setelah data awal selesai diisi.</li></ol>`,
+en:`<ol><li><b>Create an account.</b> On first open choose a language, enter company name, user and password (minimum 6 characters), then press <i>Create account &amp; start</i>. Afterwards you only log in.</li>
+<li><b>Set the look</b> in Settings: language, light/dark theme, accent color, company name.</li>
+<li><b>Activate Premium</b> (if you have a code, downloaded file only): Settings, License box, enter the code in the format <code>FFMI-XXXX-XXXX-XXXX</code>, press <i>Activate</i>.</li>
+<li><b>Enter your data.</b> <b>Raw materials</b> menu: update nutrient values from your lab results, prices (Rp/kg), inclusion limits Min/Max %, and pelletability score (Pel 0-100). <b>Machines</b> menu: enter capacity t/h, maximum fat and fiber, minimum pel score, maximum motor load and process cost Rp/kg for your line.</li>
+<li><b>Write down your password.</b> There is no forgot-password feature (see Troubleshooting).</li>
+<li>Premium users: make the first <b>Backup data</b> after the initial data is entered.</li></ol>`}},
+
+{id:'usage',t:{id:'Penggunaan sehari-hari',en:'Everyday use'},b:{
+id:`<h4>Membuat formula (menu Formulasi)</h4>
+<ol><li>Pilih <b>Target nutrisi</b> (Broiler Starter/Grower/Finisher/Layer). Kolom Min/Max terisi otomatis dan boleh Anda ubah (ME, CP, Lys, Met, Ca, avP, serat, lemak). Kolom kosong berarti tidak dibatasi.</li><li>Pilih <b>Mesin / Line</b>.</li><li>Tekan <b>Hitung formula</b>.</li></ol>
+<p>Setiap kandidat menampilkan: komposisi (batang warna dan tabel %), biaya bahan baku per kg dan <b>biaya manufaktur sebenarnya</b> per kg (bahan baku + biaya proses), nilai nutrisi, status <b>Feasible / Tidak feasible</b>, estimasi output t/h, dan empat indikator risiko (Kualitas pellet, Choking, Motor load, Dampak kapasitas) berwarna hijau/kuning/merah. Bagian <b>Mengapa?</b> menjelaskan sebab risiko, dan <b>Knowledge terkait</b> menampilkan catatan pakar untuk bahan yang dipakai.</p>
+<p>Demo menampilkan 1 kandidat (biaya terendah). Premium menampilkan 3: biaya terendah, risiko produksi terendah, dan seimbang. Tekan <b>Simpan formula</b> untuk menyimpannya ke Riwayat.</p>
+<p>Jika muncul <i>Tidak ada solusi</i>, target tidak bisa dipenuhi dengan bahan dan batas inklusi saat ini: longgarkan target, atau tambah/longgarkan bahan.</p>
+<h4>Menu lain</h4>
+<ul><li><b>Bahan baku:</b> tabel yang bisa diedit langsung; tombol <i>+ Tambah</i> menambah baris, <i>×</i> menghapus.</li><li><b>Mesin:</b> parameter tiap lini produksi.</li><li><b>Knowledge:</b> catatan pakar per bahan (isi, sumber, tingkat keyakinan) yang muncul di hasil formula.</li><li><b>Riwayat:</b> daftar formula tersimpan. Isi <b>Output aktual t/h</b> dari produksi; aplikasi menghitung deviasi terhadap estimasi sebagai umpan balik untuk memperbaiki parameter Anda.</li></ul>
+<p><b>Penting:</b> skor pelletability, motor load, dan output t/h adalah <b>estimasi</b>. Verifikasi dengan hasil lab dan uji produksi sebelum formula dipakai.</p>`,
+en:`<h4>Creating a formula (Formulation menu)</h4>
+<ol><li>Choose a <b>Nutrition target</b> (Broiler Starter/Grower/Finisher/Layer). The Min/Max cells fill in automatically and you may edit them (ME, CP, Lys, Met, Ca, avP, fiber, fat). An empty cell means no limit.</li><li>Choose the <b>Machine / Line</b>.</li><li>Press <b>Generate</b>.</li></ol>
+<p>Each candidate shows: composition (colour bar and % table), raw material cost per kg and the <b>true manufacturing cost</b> per kg (raw material + process cost), nutrient values, <b>Feasible / Not feasible</b> status, estimated output t/h, and four risk indicators (Pellet quality, Choking, Motor load, Capacity impact) coloured green/amber/red. <b>Why?</b> explains the risks, and <b>Related knowledge</b> shows expert notes for the materials used.</p>
+<p>Demo shows 1 candidate (lowest cost). Premium shows 3: lowest cost, lowest manufacturing risk and balanced. Press <b>Save formula</b> to store it in History.</p>
+<p>If <i>No solution</i> appears, the targets cannot be met with the current materials and inclusion limits: relax the targets, or add/loosen materials.</p>
+<h4>Other menus</h4>
+<ul><li><b>Raw materials:</b> directly editable table; <i>+ Add</i> adds a row, <i>×</i> deletes it.</li><li><b>Machines:</b> parameters for each production line.</li><li><b>Knowledge:</b> expert notes per material (text, source, confidence) shown in formula results.</li><li><b>History:</b> saved formulas. Enter the <b>Actual output t/h</b> from production; the app computes the deviation from the estimate as feedback to improve your parameters.</li></ul>
+<p><b>Important:</b> pelletability score, motor load and output t/h are <b>estimates</b>. Verify with lab results and production trials before using a formula.</p>`}},
+
+{id:'care',t:{id:'Perawatan dan update',en:'Maintenance and updates'},b:{
+id:`<h4>Menjaga data</h4>
+<ul><li>Data tersimpan di browser perangkat. <b>Menghapus data situs/cache browser, mode incognito, atau ganti browser/perangkat</b> dapat menghilangkan data atau membuatnya tidak terlihat.</li><li>Pengguna Premium: lakukan <b>Backup data</b> secara berkala (Pengaturan) dan simpan file <code>.json</code> di tempat aman (flashdisk/cloud pribadi). Backup juga dipakai untuk pindah perangkat lewat <b>Restore data</b>.</li><li>Ganti password lewat <b>Ganti password</b> di Pengaturan. Tekan <b>Keluar</b> bila perangkat dipakai bersama.</li><li>Tinjau berkala harga bahan baku, hasil lab, dan parameter mesin agar hasil tetap relevan.</li></ul>
+<h4>Update aplikasi</h4>
+<ul><li><b>Web / aplikasi terinstal:</b> versi baru terambil otomatis saat online. Jika masih tampak versi lama, tutup lalu buka lagi (atau muat ulang halaman). Cek nomor versi di header.</li><li><b>File unduhan:</b> unduh ZIP terbaru, lalu ganti <code>FFMI.html</code> lama. Sebelum mengganti, <b>lakukan Backup</b> (Premium). Setelah itu buka file baru; bila data tidak muncul, gunakan Restore.</li><li>Manual ini ikut diperbarui pada setiap versi. Lihat bagian <b>Riwayat versi</b> untuk perubahan terbaru.</li></ul>`,
+en:`<h4>Protecting your data</h4>
+<ul><li>Data is stored in the device's browser. <b>Clearing site data/cache, private/incognito mode, or switching browser/device</b> can remove it or make it invisible.</li><li>Premium users: make a <b>Backup data</b> regularly (Settings) and keep the <code>.json</code> file somewhere safe (flash drive/personal cloud). A backup is also used to move to another device via <b>Restore data</b>.</li><li>Change your password with <b>Change password</b> in Settings. Press <b>Log out</b> on shared devices.</li><li>Review raw material prices, lab results and machine parameters regularly so results stay relevant.</li></ul>
+<h4>Updating the app</h4>
+<ul><li><b>Web / installed app:</b> new versions are fetched automatically when online. If the old version still shows, close and reopen (or reload the page). Check the version number in the header.</li><li><b>Downloaded file:</b> download the latest ZIP and replace the old <code>FFMI.html</code>. Before replacing, <b>make a Backup</b> (Premium). Then open the new file; if your data does not appear, use Restore.</li><li>This manual is updated with every version. See <b>Version history</b> for the latest changes.</li></ul>`}},
+
+{id:'trouble',t:{id:'Troubleshooting',en:'Troubleshooting'},b:{
+id:`<details><summary>Saya lupa password.</summary><p>Tidak ada fitur reset karena data hanya ada di perangkat Anda. Satu-satunya cara adalah menghapus data situs browser untuk aplikasi ini, yang <b>menghapus semua data</b> dan membuat akun baru. File Backup tidak membantu karena membawa password lama. Simpan password di tempat aman.</p></details>
+<details><summary>Kode akses dinyatakan tidak valid.</summary><p>Pastikan formatnya <code>FFMI-XXXX-XXXX-XXXX</code>, periksa huruf O dengan angka 0 dan huruf I dengan angka 1, dan salin tanpa spasi tambahan. Bila tetap gagal, hubungi penyedia aplikasi (Megay Studio): <a href="https://wa.me/6281915968790" target="_blank" rel="noopener">WhatsApp 0819 1596 8790</a> atau <a href="mailto:megi.hidayatullah@gmail.com">megi.hidayatullah@gmail.com</a>.</p></details>
+<details><summary>Kolom kode akses tidak ada, hanya tombol unduh.</summary><p>Anda sedang membuka versi web atau aplikasi terinstal (Demo). Aktivasi Premium hanya di file <code>FFMI.html</code> yang diunduh dan dibuka offline.</p></details>
+<details><summary>Data saya hilang atau tampak kosong.</summary><p>Periksa apakah Anda memakai browser, perangkat, alamat web, atau file yang sama seperti sebelumnya; data tiap tempat terpisah. Mode incognito dan penghapusan data situs juga menghilangkan data. Jika punya file Backup, gunakan Restore (Premium).</p></details>
+<details><summary>Muncul "Tidak ada solusi".</summary><p>Target nutrisi tidak bisa dipenuhi. Longgarkan batas Min/Max, periksa batas inklusi bahan (Min %/Max %), atau tambahkan bahan baku.</p></details>
+<details><summary>Backup/Restore menolak dan menyebut Premium.</summary><p>Fitur ini hanya untuk Premium di file unduhan.</p></details>
+<details><summary>Tidak bisa menambah bahan, mesin, atau menyimpan formula.</summary><p>Anda mencapai batas mode Demo (lihat bagian Versi Web dan Premium).</p></details>
+<details><summary>File backup ditolak ("File backup tidak valid").</summary><p>Gunakan file <code>.json</code> hasil Backup dari aplikasi ini dan jangan diedit manual.</p></details>
+<details><summary>Masih tampil versi lama setelah update.</summary><p>Tutup semua tab/aplikasi FFMI lalu buka lagi, atau muat ulang halaman 2 kali. Pada file unduhan, pastikan Anda membuka file yang baru.</p></details>
+<details><summary>Halaman kosong atau tampilan rusak.</summary><p>Gunakan browser versi terbaru dan pastikan JavaScript aktif. Tabel lebar dapat digeser ke samping di layar kecil.</p></details>
+<details><summary>Tombol Install tidak berfungsi.</summary><p>Gunakan menu browser (<i>Install app</i> / <i>Tambahkan ke layar utama</i>). Pemasangan memerlukan alamat https dan tidak tersedia di semua browser.</p></details>`,
+en:`<details><summary>I forgot my password.</summary><p>There is no reset because data only exists on your device. The only way is to clear this app's site data in the browser, which <b>deletes all data</b> and lets you create a new account. A Backup file does not help because it carries the old password. Keep your password somewhere safe.</p></details>
+<details><summary>The access code is reported as invalid.</summary><p>Make sure the format is <code>FFMI-XXXX-XXXX-XXXX</code>, check letter O vs digit 0 and letter I vs digit 1, and copy it without extra spaces. If it still fails, contact the app provider (Megay Studio): <a href="https://wa.me/6281915968790" target="_blank" rel="noopener">WhatsApp 0819 1596 8790</a> or <a href="mailto:megi.hidayatullah@gmail.com">megi.hidayatullah@gmail.com</a>.</p></details>
+<details><summary>There is no access code field, only a download button.</summary><p>You are on the web version or the installed app (Demo). Premium activation works only in the downloaded <code>FFMI.html</code> opened offline.</p></details>
+<details><summary>My data is gone or looks empty.</summary><p>Check whether you are using the same browser, device, web address or file as before; data in each place is separate. Incognito mode and clearing site data also remove it. If you have a Backup file, use Restore (Premium).</p></details>
+<details><summary>"No solution" appears.</summary><p>The nutrition targets cannot be met. Relax the Min/Max limits, check the material inclusion limits (Min %/Max %), or add raw materials.</p></details>
+<details><summary>Backup/Restore refuses and mentions Premium.</summary><p>These features are Premium-only in the downloaded file.</p></details>
+<details><summary>I cannot add materials, machines or save formulas.</summary><p>You reached the Demo limits (see Web version and Premium).</p></details>
+<details><summary>A backup file is rejected ("Invalid backup file").</summary><p>Use the <code>.json</code> file produced by Backup in this app and do not edit it by hand.</p></details>
+<details><summary>The old version still shows after an update.</summary><p>Close all FFMI tabs/apps and reopen, or reload the page twice. For the downloaded file, make sure you opened the new file.</p></details>
+<details><summary>Blank page or broken layout.</summary><p>Use a recent browser and make sure JavaScript is enabled. Wide tables can be scrolled sideways on small screens.</p></details>
+<details><summary>The Install button does not work.</summary><p>Use the browser menu (<i>Install app</i> / <i>Add to Home screen</i>). Installing requires an https address and is not available in every browser.</p></details>`}},
+
+{id:'faq',t:{id:'FAQ',en:'FAQ'},b:{
+id:`<details><summary>Apakah data saya dikirim ke internet?</summary><p>Tidak. Semua data disimpan di browser perangkat Anda. Internet hanya dipakai untuk memuat aplikasi versi web dan mengunduh update.</p></details>
+<details><summary>Kenapa Premium hanya offline?</summary><p>Agar data formula, harga, dan mesin yang sensitif hanya berada di perangkat Anda sendiri dan tidak terkait dengan alamat web publik.</p></details>
+<details><summary>Bagaimana mendapatkan kode Premium?</summary><p>Hubungi penyedia aplikasi, Megay Studio: <a href="https://wa.me/6281915968790" target="_blank" rel="noopener">WhatsApp 0819 1596 8790</a> atau email <a href="mailto:megi.hidayatullah@gmail.com">megi.hidayatullah@gmail.com</a>.</p></details>
+<details><summary>Bisa dipakai oleh beberapa user?</summary><p>Aplikasi ini single user. Satu akun per browser/perangkat; untuk berbagi, bagikan file Backup (Premium).</p></details>
+<details><summary>Bisa dipakai di beberapa perangkat?</summary><p>Bisa, tetapi data tiap perangkat terpisah. Pindahkan data dengan Backup lalu Restore (Premium).</p></details>
+<details><summary>Apakah nilai nutrisi bawaan akurat?</summary><p>Itu nilai contoh. Gunakan hasil analisis lab Anda sendiri.</p></details>
+<details><summary>Apakah hasil formula bisa langsung diproduksi?</summary><p>Aplikasi adalah alat bantu keputusan. Estimasi pelletability, motor load, dan output perlu diverifikasi oleh ahli nutrisi/produksi dan uji lapangan.</p></details>
+<details><summary>Apakah perlu internet untuk memakai aplikasi?</summary><p>Versi web perlu internet saat pertama dibuka; sesudahnya dapat offline. File unduhan tidak memerlukan internet.</p></details>
+<details><summary>Bahasa dan mata uang?</summary><p>Bahasa Indonesia/English dapat diganti di Pengaturan. Harga memakai Rupiah (Rp/kg).</p></details>`,
+en:`<details><summary>Is my data sent to the internet?</summary><p>No. All data is stored in your device's browser. The internet is only used to load the web version and download updates.</p></details>
+<details><summary>Why is Premium offline only?</summary><p>So that sensitive formula, price and machine data stays on your own device and is not tied to a public web address.</p></details>
+<details><summary>How do I get a Premium code?</summary><p>Contact the app provider, Megay Studio: <a href="https://wa.me/6281915968790" target="_blank" rel="noopener">WhatsApp 0819 1596 8790</a> or email <a href="mailto:megi.hidayatullah@gmail.com">megi.hidayatullah@gmail.com</a>.</p></details>
+<details><summary>Can several users use it?</summary><p>It is a single-user app. One account per browser/device; to share data, share a Backup file (Premium).</p></details>
+<details><summary>Can I use it on several devices?</summary><p>Yes, but each device's data is separate. Move data with Backup then Restore (Premium).</p></details>
+<details><summary>Are the built-in nutrient values accurate?</summary><p>They are sample values. Use your own lab analysis.</p></details>
+<details><summary>Can a generated formula go straight to production?</summary><p>The app is a decision-support tool. Pelletability, motor load and output estimates must be verified by a nutritionist/production expert and field trials.</p></details>
+<details><summary>Do I need internet to use the app?</summary><p>The web version needs internet on first open; afterwards it can work offline. The downloaded file never needs internet.</p></details>
+<details><summary>Language and currency?</summary><p>Indonesian/English can be switched in Settings. Prices use Rupiah (Rp/kg).</p></details>`}},
+
+{id:'info',t:{id:'Informasi lain',en:'Other information'},b:{
+id:`<h4>Istilah</h4>
+<div class="w"><table><tr><td>ME</td><td>Energi metabolis (kcal/kg)</td></tr><tr><td>CP</td><td>Protein kasar (%)</td></tr><tr><td>Lys / Met</td><td>Lisin / Metionin (%)</td></tr><tr><td>Ca / avP</td><td>Kalsium / fosfor tersedia (%)</td></tr><tr><td>Pel</td><td>Skor pelletability bahan (0-100); makin tinggi makin mudah dipelet</td></tr><tr><td>Choking</td><td>Risiko die/mesin tersumbat, terkait kadar serat</td></tr><tr><td>Motor load</td><td>Estimasi beban motor pellet mill (%)</td></tr><tr><td>t/h</td><td>Ton per jam (kapasitas/output)</td></tr><tr><td>Biaya manufaktur sebenarnya</td><td>Biaya bahan baku + biaya proses (Rp/kg)</td></tr></table></div>
+<h4>Tips</h4>
+<ul><li>Buat satu entri Mesin untuk tiap lini dan sesuaikan batasnya dengan kondisi aktual.</li><li>Catat output aktual di Riwayat agar bisa membandingkan dengan estimasi.</li><li>Perbarui harga bahan baku secara rutin.</li><li>Gunakan Knowledge untuk menyimpan pengalaman pabrik per bahan.</li></ul>
+<h4>Browser yang didukung</h4><p>Versi terbaru Chrome, Edge, Firefox, dan Safari.</p>
+<h4>Privasi dan batasan</h4><p>Data hanya di perangkat Anda. Hasil aplikasi bersifat estimasi dan bukan pengganti keputusan profesional. Penyedia tidak bertanggung jawab atas keputusan produksi yang diambil hanya berdasarkan aplikasi ini.</p>
+<h4>Penyedia dan kontak</h4><p><b>Megay Studio</b><br>WhatsApp: <a href="https://wa.me/6281915968790" target="_blank" rel="noopener">0819 1596 8790</a><br>Email: <a href="mailto:megi.hidayatullah@gmail.com">megi.hidayatullah@gmail.com</a></p><p>Hubungi kami untuk kode akses Premium, pertanyaan penggunaan, atau laporan masalah. Sertakan nomor versi dan mode (lihat header aplikasi) agar bantuan lebih cepat.</p>`,
+en:`<h4>Glossary</h4>
+<div class="w"><table><tr><td>ME</td><td>Metabolizable energy (kcal/kg)</td></tr><tr><td>CP</td><td>Crude protein (%)</td></tr><tr><td>Lys / Met</td><td>Lysine / Methionine (%)</td></tr><tr><td>Ca / avP</td><td>Calcium / available phosphorus (%)</td></tr><tr><td>Pel</td><td>Material pelletability score (0-100); higher means easier to pellet</td></tr><tr><td>Choking</td><td>Risk of die/machine blockage, related to fiber level</td></tr><tr><td>Motor load</td><td>Estimated pellet mill motor load (%)</td></tr><tr><td>t/h</td><td>Tons per hour (capacity/output)</td></tr><tr><td>True manufacturing cost</td><td>Raw material cost + process cost (Rp/kg)</td></tr></table></div>
+<h4>Tips</h4>
+<ul><li>Create one Machine entry per line and set its limits to actual conditions.</li><li>Record actual output in History to compare with the estimate.</li><li>Update raw material prices regularly.</li><li>Use Knowledge to store your plant's experience per material.</li></ul>
+<h4>Supported browsers</h4><p>Recent versions of Chrome, Edge, Firefox and Safari.</p>
+<h4>Privacy and limits</h4><p>Data stays on your device. App results are estimates and not a substitute for professional judgment. The provider is not liable for production decisions made solely on this app.</p>
+<h4>Provider and contact</h4><p><b>Megay Studio</b><br>WhatsApp: <a href="https://wa.me/6281915968790" target="_blank" rel="noopener">0819 1596 8790</a><br>Email: <a href="mailto:megi.hidayatullah@gmail.com">megi.hidayatullah@gmail.com</a></p><p>Contact us for Premium access codes, usage questions or problem reports. Please include the version number and mode (see the app header) for faster help.</p>`}}
+];
+const CHANGELOG=[
+{v:'1.1.1',d:'2026-10-06',id:['Kontak penyedia (Megay Studio: WhatsApp dan email) dicantumkan di Panduan: FAQ, Troubleshooting, dan Informasi lain.'],en:['Provider contact (Megay Studio: WhatsApp and email) added to the Manual: FAQ, Troubleshooting and Other information.']},
+{v:'1.1.0',d:'2026-10-06',id:['Versi web untuk GitHub Pages: Demo bisa dipakai di web, diunduh, atau di-install sebagai aplikasi.','Premium hanya aktif di file FFMI.html yang diunduh (offline).','Panduan (User Manual) ditambahkan di dalam aplikasi, termasuk riwayat versi.','Header menampilkan versi, mode jalan, dan status lisensi.'],en:['Web version for GitHub Pages: Demo works on the web, can be downloaded, or installed as an app.','Premium is active only in the downloaded FFMI.html file (offline).','In-app Manual added, including version history.','Header shows version, running mode and license status.']},
+{v:'1.0.0',d:'2026-10-01',id:['Rilis awal offline: Formulasi, Bahan baku, Mesin, Knowledge, Riwayat, Demo/Premium dengan kode akses, bahasa ID/EN.'],en:['Initial offline release: Formulation, Raw materials, Machines, Knowledge, History, Demo/Premium with access code, ID/EN languages.']}
+];
+let ML=null,MAN_ON=0;
+const mLang=()=>ML||(S&&S.lang)||'id';
+function manBody(){const L=mLang(),id=L=='id';
+return`<div class="card"><h2>${id?'Panduan Pengguna':'User Manual'}</h2><p class="mu">${id?'Panduan ini sesuai untuk aplikasi versi':'This manual matches app version'} <b>v${APP_VER}</b> (${APP_DATE}).</p>
+<p><button type="button" class="b s" onclick="manLang('id')">Indonesia</button> <button type="button" class="b s" onclick="manLang('en')">English</button></p>
+<input type="search" placeholder="${id?'Cari di panduan...':'Search the manual...'}" oninput="manFind(this.value)">
+<p class="tg">${MAN.map(s=>`<button type="button" class="b s" onclick="manGo('${s.id}')">${s.t[L]}</button>`).join('')}<button type="button" class="b s" onclick="manGo('log')">${id?'Riwayat versi':'Version history'}</button></p></div>`
++MAN.map(s=>`<div class="card msec" id="m_${s.id}"><h3>${s.t[L]}</h3>${s.b[L]}</div>`).join('')
++`<div class="card msec" id="m_log"><h3>${id?'Riwayat versi':'Version history'}</h3>${CHANGELOG.map(c=>`<p><b>v${c.v}</b> <span class="mu">${c.d}</span></p><ul>${c[L].map(x=>`<li>${x}</li>`).join('')}</ul>`).join('')}</div>`}
+function manGo(id){const e=document.getElementById('m_'+id);if(e){e.style.display='';e.scrollIntoView({behavior:'smooth',block:'start'})}}
+function manFind(q){q=q.trim().toLowerCase();document.querySelectorAll('.msec').forEach(e=>{e.style.display=!q||e.textContent.toLowerCase().includes(q)?'':'none';e.querySelectorAll('details').forEach(d=>d.open=!!q)})}
+function manLang(l){ML=l;render()}
+function manOpen(id){if(OK){page='man'}else MAN_ON=1;render();setTimeout(()=>manGo(id),50)}
+
+let OK=0;
+function render(){document.documentElement.dataset.t=S?S.theme:'light';if(S)document.documentElement.style.setProperty('--ac',S.ac);
+if(!OK&&MAN_ON)return $('#app').innerHTML=`<header><b>FFMI</b><span>v${APP_VER} · ${modeLbl()}</span><button type="button" class="b s" onclick="MAN_ON=0;render()">${mLang()=='id'?'Kembali':'Back'}</button></header><main>${manBody()}</main>`;
+if(!OK)return $('#app').innerHTML=`<form id="lg" class="card" onsubmit="return login(event)"><h2>FFMI</h2><p class="mu">Feed Formulation & Manufacturing Intelligence</p>${S?'':`<label>Bahasa / Language</label><select id="ln"><option value="id">Indonesia</option><option value="en">English</option></select><label>${T('Nama perusahaan','Company')}</label><input id="co">`}<label>User</label><input id="us" value="${S?esc(S.user):''}" required><label>Password${S?'':' (min 6)'}</label><input id="pw" type="password" required minlength="6"><p><button class="b">${S?T('Masuk','Log in'):T('Buat akun & mulai','Create account & start')}</button></p><p class="mu" id="er"></p><p class="mu"><a href="#" onclick="MAN_ON=1;render();return false">${T('Panduan','Manual')}</a> · v${APP_VER}</p></form>`;
+const tabs=[['form',T('Formulasi','Formulation')],['mats',T('Bahan baku','Raw materials')],['mach',T('Mesin','Machines')],['kn','Knowledge'],['hist',T('Riwayat','History')],['man',T('Panduan','Manual')],['set',T('Pengaturan','Settings')]];
+const bodies={form:pForm,mats:()=>`<h2>${T('Database bahan baku','Raw material database')}</h2><p class="mu">${T('Nilai contoh; verifikasi dengan hasil lab Anda. Pel = skor pelletability 0-100.','Sample values; verify with your lab data. Pel = pelletability score 0-100.')}</p>`+tbl('mats',[['n',T('Bahan','Material'),'text'],['me','ME'],['cp','CP'],['fat',T('Lemak','Fat')],['fib',T('Serat','Fiber')],['ca','Ca'],['ap','avP'],['lys','Lys'],['met','Met'],['pr','Rp/kg'],['mn','Min %'],['mx','Max %'],['pel','Pel']]),
+mach:()=>`<h2>${T('Mesin & proses','Machines & process')}</h2>`+tbl('machines',[['n',T('Nama','Name'),'text'],['cap','t/h'],['maxFat',T('Maks lemak %','Max fat %')],['maxFib',T('Maks serat %','Max fiber %')],['minPel',T('Min skor pel','Min pel score')],['maxLoad',T('Maks motor load %','Max motor load %')],['proc',T('Biaya proses Rp/kg','Process cost Rp/kg')]]),
+kn:()=>`<h2>Knowledge</h2>`+`<div class="card mu">${T('Catatan pakar per bahan; tampil di laporan formula bila bahan dipakai.','Expert notes per material; shown in the report when the material is used.')}</div>`+tbl('notes',[['m',T('Bahan','Material'),'text'],['t',T('Pengetahuan','Knowledge'),'text'],['src',T('Sumber','Source'),'text'],['conf',T('Keyakinan','Confidence'),'text']]),hist:pHist,man:manBody,set:pSet};
+$('#app').innerHTML=`<header><b>FFMI</b><span>${esc(S.co)} · ${esc(S.user)}</span><span>v${APP_VER} · ${modeLbl()} · ${prem()?'Premium':'Demo'}</span></header>${prem()?'':`<div class="ban">${PREM_OK?T('Mode Demo (fitur terbatas). Masukkan kode akses di Pengaturan untuk Premium.','Demo mode (limited). Enter an access code in Settings for Premium.'):T('Mode Demo ('+where()+', fitur terbatas). Premium hanya di file unduhan offline - lihat Pengaturan.','Demo mode ('+where()+', limited). Premium only in the downloaded offline file - see Settings.')}</div>`}<nav>${tabs.map(t=>`<button class="${page==t[0]?'on':''}" onclick="page='${t[0]}';render()">${t[1]}</button>`).join('')}</nav><main>${bodies[page]()}</main>`;
+if(page=='form'){const q=$('#pre');if(q)fillP()}}
+async function login(e){e.preventDefault();const u=$('#us').value.trim(),p=$('#pw').value;
+if(!S){const s=Math.random().toString(36).slice(2);init(u,{h:await hp(p,s),s},$('#co').value||'Feedmill');S.lang=$('#ln').value;save();OK=1;return render(),false}
+if(u==S.user&&await hp(p,S.s)==S.h){OK=1;page='form';res=null;msg='';render()}else $('#er').textContent=T('User atau password salah','Wrong user or password');return false}
+render();
+// Web base: offline cache (PWA) + minta penyimpanan permanen agar data tidak mudah terhapus browser
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(()=>{})}
+</script></body></html>
