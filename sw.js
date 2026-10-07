@@ -1,6 +1,6 @@
 // Service worker FFMI: aplikasi tetap bisa dibuka offline setelah kunjungan pertama.
 // Naikkan nomor VERSION setiap kali Anda mengubah file aplikasi agar pengguna mendapat versi terbaru.
-const VERSION = 'ffmi-1.1.1';
+const VERSION = 'ffmi-1.2.0';
 const ASSETS = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
