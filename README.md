@@ -1,4 +1,4 @@
-# FFMI - Feed Formulation & Manufacturing Intelligence (Web) v1.3.0
+# FFMI - Feed Formulation & Manufacturing Intelligence (Web) v1.3.1
 
 Aplikasi web statis (tanpa server, tanpa build). Data pengguna tersimpan di browser masing-masing (localStorage) dan tidak dikirim ke server.
 Sumber aplikasi: FFMI.html versi offline lengkap (diperbarui 2 Okt 2026) dengan revisi 1.3.0 (9 Okt 2026) + lapisan web (PWA, pembatasan Premium, User Manual, versi).
